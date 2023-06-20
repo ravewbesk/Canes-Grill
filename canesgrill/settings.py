@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'churras',
+    'pessoas',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -129,6 +130,11 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'templates/static',
 ]
+
+# Média
+
+MEDIA_BOOT = BASE_DIR / 'media'
+MEDIA_URL = 'media/'
 
 
 # Default primary key field type
