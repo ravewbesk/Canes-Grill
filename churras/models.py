@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import datetime
+from django.contrib.auth.models import User
 
 from pessoas.models import Pessoa
 
@@ -7,7 +8,7 @@ from pessoas.models import Pessoa
 class Prato(models.Model):
     # Serão os campos da tabela, ou seja, atributos da classe
 
-    pessoa = models.ForeignKey(Pessoa, on_delete = models.CASCADE)
+    pessoa = models.ForeignKey(User, on_delete = models.CASCADE)
 
     nome_prato = models.CharField(
         max_length=100,
