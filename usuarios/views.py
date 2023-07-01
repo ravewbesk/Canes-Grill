@@ -1,7 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
-from django.contrib import auth
+from django.contrib import auth, messages
 from churras.models import Prato
+
+def campo_vazio(campo):
+    return not campo.strip()
+
+def senha_nao_sao_iguais(senha, senha2):
+    return senha != senha2
 
 def cadastro(request):
     #print(f'Method: {request.method}')
@@ -12,24 +18,24 @@ def cadastro(request):
         senha = request.POST['senha']
         senha2 = request.POST['senha2']
 
-        if not nome.strip():
-            print('O campo nome não pode ficar em branco')
+        if campo_vazio(nome):
+            messages.error(request, 'O campo nome não pode ficar em branco')
             return redirect('cadastro')
 
-        if not email.strip():
-            print('O campo email não pode ficar em branco')
+        if campo_vazio(email):
+            messages.error(request, 'O campo email não pode ficar em branco')
             return redirect('cadastro')
         
-        if senha != senha2 or not senha.strip() or not senha2.strip():
-            print('As senhas não coincidem ou está em branco')
+        if senha_nao_sao_iguais(senha, senha2) or campo_vazio(senha) or campo_vazio(senha2):
+            messages.error(request, 'As senhas não coincidem ou está em branco')
             return redirect('cadastro')
 
         if User.objects.filter(email=email).exists():
-            print('E-mail já cadastrado')
+            messages.error(request, 'E-mail já cadastrado')
             return redirect('cadastro')
         
         if User.objects.filter(username=email).exists():
-            print('Usuário já cadastrado')
+            messages.error(request, 'Usuário já cadastrado')
             return redirect('cadastro')
         
         user = User.objects.create_user(username=nome, email=email, password=senha)
@@ -48,7 +54,7 @@ def login(request):
         senha = request.POST['senha']
 
         if email == "" or senha == "":
-            print('Os campos e-mail e senha não podem ficar em branco')
+            messages.error(request, 'Os campos e-mail e senha não podem ficar em branco')
             return redirect('login')
         
         print(email, senha)
@@ -59,18 +65,24 @@ def login(request):
             if user is not None:
                 auth.login(request, user)
                 print('Login efetuado com sucesso')
+                messages.success(request, 'Login efetuado com sucesso')
+                return redirect('dashboard')
 
-        print('Usuário e/ou senha inválidas')
+        
+        messages.error(request, 'Usuário e/ou senha inválidas')
         return redirect('login')
 
     return render(request, 'login.html')
 
 def dashboard(request):
     if request.user.is_authenticated:
-        pratos = Prato.objects.filter(publicado = True).order_by('-date_prato')
+        id = request.user.id
+        print(f'\n\n ID usuário: {id}')
+       
+        pratos = Prato.objects.filter(pessoa=id).order_by('-date_prato')
 
         contexto = {
-        'lista_pratos' : pratos
+            'lista_pratos' : pratos
         }
 
         return render(request, 'dashboard.html', contexto)
@@ -112,5 +124,9 @@ def cria_prato(request):
 
         return render(request, 'cria_prato.html')
 
-    print('Você não tem permissão para Criar Pratos.')
+    messages.error(request, 'Você não tem permissão para Criar Pratos.')
     return redirect('index')
+
+
+
+
